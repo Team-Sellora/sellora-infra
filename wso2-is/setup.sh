@@ -13,9 +13,7 @@ AUTH=$(echo -n "$ADMIN_USER:$ADMIN_PASS" | base64)
 echo "Target IS: $IS_URL"
 echo ""
 
-# ─────────────────────────────────────────────
 echo "Step 1: Creating custom claims..."
-# ─────────────────────────────────────────────
 
 curl -k -s -X POST "$IS_URL/api/server/v1/claim-dialects/local/claims" \
   -H "Authorization: Basic $AUTH" \
@@ -27,7 +25,7 @@ curl -k -s -X POST "$IS_URL/api/server/v1/claim-dialects/local/claims" \
     "dataType": "String",
     "required": true
   }'
-echo " ✓ companyId claim created"
+echo "done: companyId claim created"
 
 curl -k -s -X POST "$IS_URL/api/server/v1/claim-dialects/local/claims" \
   -H "Authorization: Basic $AUTH" \
@@ -39,12 +37,10 @@ curl -k -s -X POST "$IS_URL/api/server/v1/claim-dialects/local/claims" \
     "dataType": "String",
     "required": true
   }'
-echo " ✓ sellorRole claim created"
+echo "done: sellorRole claim created"
 
-# ─────────────────────────────────────────────
 echo ""
 echo "Step 2: Creating Sellora OIDC application..."
-# ─────────────────────────────────────────────
 
 curl -k -s -X POST "$IS_URL/api/server/v1/applications" \
   -H "Authorization: Basic $AUTH" \
@@ -69,12 +65,10 @@ curl -k -s -X POST "$IS_URL/api/server/v1/applications" \
       }
     }
   }'
-echo " ✓ OIDC application created"
+echo "done: OIDC application created"
 
-# ─────────────────────────────────────────────
 echo ""
 echo "Step 3: Creating test users..."
-# ─────────────────────────────────────────────
 
 create_user() {
   local USERNAME=$1
@@ -92,7 +86,7 @@ create_user() {
         \"sellorRole\": \"$ROLE\"
       }
     }"
-  echo " ✓ $USERNAME ($ROLE) created"
+  echo " done: $USERNAME ($ROLE) created"
 }
 
 create_user "admin@testco.com"    "CompanyAdmin"
