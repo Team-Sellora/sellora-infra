@@ -16,7 +16,7 @@
 
 set -euo pipefail
 cd "$(dirname "$0")"
-[ -f .env ] || { echo "ERROR: .env not found. Copy .env.example to .env first."; exit 1; }
+[[ -f .env ]] || { echo "ERROR: .env not found. Copy .env.example to .env first." >&2; exit 1; }
 # shellcheck disable=SC1091
 source .env
 
@@ -32,16 +32,18 @@ USERS=(
 )
 
 role_id () {
+  local name="$1"
   curl -sk -u "$AUTH" "$IS_HOST/scim2/v2/Roles" | python3 -c "
 import sys, json
 for r in json.load(sys.stdin).get('Resources', []):
-    if r['displayName'] == '$1':
+    if r['displayName'] == '$name':
         print(r['id']); break
 "
 }
 
 user_id () {
-  curl -sk -u "$AUTH" "$IS_HOST/scim2/Users?filter=userName+eq+$1" | python3 -c "
+  local name="$1"
+  curl -sk -u "$AUTH" "$IS_HOST/scim2/Users?filter=userName+eq+$name" | python3 -c "
 import sys, json
 r = json.load(sys.stdin).get('Resources', [])
 print(r[0]['id'] if r else '')
@@ -52,7 +54,7 @@ for ENTRY in "${USERS[@]}"; do
   IFS=':' read -r UNAME GIVEN ROLE <<< "$ENTRY"
 
   UID_EXISTING=$(user_id "$UNAME")
-  if [ -n "$UID_EXISTING" ]; then
+  if [[ -n "$UID_EXISTING" ]]; then
     echo "  = $UNAME (already exists, skipped)"
     UID_VAL="$UID_EXISTING"
   else
@@ -67,12 +69,12 @@ for ENTRY in "${USERS[@]}"; do
         \"urn:scim:schemas:extension:custom:User\": { \"companyId\": \"$SEED_COMPANY_ID\" }
       }" | python3 -c "import sys,json; print(json.load(sys.stdin).get('id',''))")
 
-    [ -n "$UID_VAL" ] || { echo "  ! $UNAME FAILED to create"; continue; }
+    [[ -n "$UID_VAL" ]] || { echo "  ! $UNAME FAILED to create" >&2; continue; }
     echo "  + $UNAME created ($UID_VAL)"
   fi
 
   RID=$(role_id "$ROLE")
-  [ -n "$RID" ] || { echo "  ! role $ROLE not found — run seed-roles.sh first"; continue; }
+  [[ -n "$RID" ]] || { echo "  ! role $ROLE not found — run seed-roles.sh first" >&2; continue; }
 
   CODE=$(curl -sk -u "$AUTH" -X PATCH "$IS_HOST/scim2/v2/Roles/$RID" \
     -H 'Content-Type: application/scim+json' \

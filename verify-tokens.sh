@@ -26,11 +26,11 @@
 
 set -euo pipefail
 cd "$(dirname "$0")"
-[ -f .env ] || { echo "ERROR: .env not found. Copy .env.example to .env first."; exit 1; }
+[[ -f .env ]] || { echo "ERROR: .env not found. Copy .env.example to .env first." >&2; exit 1; }
 # shellcheck disable=SC1091
 source .env
 
-[ -n "${TEST_CLIENT_ID:-}" ] || { echo "ERROR: TEST_CLIENT_ID not set in .env"; exit 1; }
+[[ -n "${TEST_CLIENT_ID:-}" ]] || { echo "ERROR: TEST_CLIENT_ID not set in .env" >&2; exit 1; }
 
 for U in companyadmin1 areamanager1 agencyop1 salesrep1 shopowner1; do
   printf '  %-15s -> ' "$U"

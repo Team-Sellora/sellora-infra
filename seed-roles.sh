@@ -14,7 +14,7 @@
 
 set -euo pipefail
 cd "$(dirname "$0")"
-[ -f .env ] || { echo "ERROR: .env not found. Copy .env.example to .env first."; exit 1; }
+[[ -f .env ]] || { echo "ERROR: .env not found. Copy .env.example to .env first." >&2; exit 1; }
 # shellcheck disable=SC1091
 source .env
 
@@ -30,7 +30,7 @@ for r in json.load(sys.stdin).get('Resources', []):
         print(r['audience']['value']); break
 ")
 
-[ -n "$ORG_ID" ] || { echo 'ERROR: could not resolve organization ID.'; exit 1; }
+[[ -n "$ORG_ID" ]] || { echo 'ERROR: could not resolve organization ID.' >&2; exit 1; }
 echo "Organization ID: $ORG_ID"
 echo
 
@@ -53,7 +53,7 @@ for ROLE in "${ROLES[@]}"; do
       \"audience\": { \"value\": \"$ORG_ID\", \"type\": \"organization\" }
     }" -o /dev/null -w '%{http_code}')
 
-  if [ "$CODE" = "201" ]; then
+  if [[ "$CODE" == "201" ]]; then
     echo "  + $ROLE created"
   else
     echo "  ! $ROLE FAILED (HTTP $CODE)"
