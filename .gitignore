@@ -1,1 +1,5 @@
-.env\nbin/\nobj/\nnode_modules/\n*.jks\n
+.env
+bin/
+obj/
+node_modules/
+*.jks
