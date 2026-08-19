@@ -5,7 +5,7 @@
 
 set -e  # Stop on any error
 
-IS_URL="${IS_URL:-https://130.210.62.210:9443}"
+IS_URL="${IS_URL:-https://deployed_url:9443}"
 ADMIN_USER="${ADMIN_USER:-admin}"
 ADMIN_PASS="${ADMIN_PASS:-admin}"
 AUTH=$(echo -n "$ADMIN_USER:$ADMIN_PASS" | base64)
