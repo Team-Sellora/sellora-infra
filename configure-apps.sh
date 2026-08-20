@@ -43,8 +43,8 @@ AUTH="$IS_ADMIN_USER:$IS_ADMIN_PASS"
 #   APP_IDS="80deb025-... 248db66f-..."
 [[ -n "${APP_IDS:-}" ]] || { echo "ERROR: APP_IDS not set in .env (space-separated application UUIDs)." >&2; exit 1; }
 
-COMPANY_CLAIM="http://wso2.org/claims/companyId"
-ROLES_CLAIM="http://wso2.org/claims/roles"
+COMPANY_CLAIM="http://wso2.org/claims/companyId"  # NOSONAR - WSO2 claim namespace ID, not a network URL
+ROLES_CLAIM="http://wso2.org/claims/roles"  # NOSONAR - WSO2 claim namespace ID, not a network URL
 
 echo "=== 1. Bind companyId to the 'profile' OIDC scope ==="
 # Fetch the current profile-scope claim list, append companyId if absent, PUT back.
