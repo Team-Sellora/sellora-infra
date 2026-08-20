@@ -12,15 +12,33 @@
 #   salesrep1     -> ['SalesRep', 'everyone']     COMP-001
 #   shopowner1    -> ['ShopOwner', 'everyone']    COMP-001
 #
-# If a claim is missing, check in this order:
-#   1. Application -> Protocol -> Access Token Attributes  (governs the ACCESS token)
-#   2. Application -> User Attributes                       (governs ID token / userinfo)
-#   3. Application -> Roles tab -> audience set to Organization
-# These are per-application settings; configuring one app does nothing for another.
+# IF A CLAIM IS MISSING (None), check in THIS order — these are the real causes,
+# in the order they bite on IS 7.3.x. Console "Access Token Attributes" alone is
+# NOT sufficient; the following are the actual gates:
 #
-# NOTE: IS caches tokens. If you change roles or attributes and the token looks
-# unchanged, check the jti — an identical jti means you got the cached token back.
-# Revoke the refresh token before retesting.
+#   1. companyId is missing:
+#      -> companyId not bound to an OIDC scope the token carries.
+#         Bind it to the 'profile' scope (configure-apps.sh does this), OR:
+#         PUT $IS_HOST/api/server/v1/oidc/scopes/profile with companyId in claims.
+#
+#   2. roles is missing (companyId present):
+#      -> the application's associatedRoles.allowedAudience is APPLICATION but the
+#         business roles are ORGANIZATION audience. They never meet.
+#         Fix: PATCH the app with associatedRoles.allowedAudience = ORGANIZATION.
+#         (configure-apps.sh does this.) This is the #1 cause and the least obvious.
+#
+#   3. BOTH missing, even after 1 and 2:
+#      -> deployment.toml lacks [oauth] authorize_all_scopes = true, or IS was not
+#         restarted after adding it. This is a SERVER FILE edit + restart, not an
+#         API call — see README "Server prerequisite". No script can do it.
+#
+#   Also: the app's requestedClaims must include companyId and roles, and the
+#   OIDC accessToken.accessTokenAttributes must list both. configure-apps.sh sets
+#   these. They are per-application — configuring one app does nothing for another.
+#
+# NOTE: IS caches tokens. If you change config and the token looks unchanged,
+# check the jti — an identical jti means you got the cached token back. Revoke
+# the refresh token, or wait for expiry, before retesting.
 #
 # Usage:  ./verify-tokens.sh
 
