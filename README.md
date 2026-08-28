@@ -199,3 +199,18 @@ attribute definition and deployment.toml is deferred to US-E0-6 (Compose stack).
 | `Authentication failed` | Wrong user password (not the admin password) |
 | `Invalid user store name` | Don't prefix usernames with `DEFAULT/`; PRIMARY takes no prefix |
 | Script `JSONDecodeError` | curl returned empty — CRLF in `.env` (`sed -i 's/\r$//'`), or wrong `IS_HOST` |
+
+## Kafka (local)
+
+Bootstrap server: `localhost:9092`
+Topic: `sellora.hierarchy.v1`
+
+Start the stack:
+```bash
+docker compose up -d
+```
+
+Watch messages on the topic:
+```bash
+docker exec -it sellora-kafka kafka-console-consumer --bootstrap-server localhost:9092 --topic sellora.hierarchy.v1 --from-beginning
+```
