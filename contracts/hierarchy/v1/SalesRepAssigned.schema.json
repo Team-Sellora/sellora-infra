@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SalesRepAssigned v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "eventId",
+    "eventType",
+    "schemaVersion",
+    "companyId",
+    "entityId",
+    "salesRepId",
+    "territoryId",
+    "agencyId",
+    "effectiveAt",
+    "correlationId"
+  ],
+  "properties": {
+    "eventId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "eventType": {
+      "const": "SalesRepAssigned"
+    },
+    "schemaVersion": {
+      "const": "1.0"
+    },
+    "companyId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "entityId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "salesRepId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "territoryId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "agencyId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "effectiveAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "correlationId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    }
+  }
+}
