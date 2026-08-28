@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "HierarchyEntityDeactivated v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "eventId",
+    "eventType",
+    "schemaVersion",
+    "companyId",
+    "entityId",
+    "entityType",
+    "effectiveAt",
+    "correlationId"
+  ],
+  "properties": {
+    "eventId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "eventType": {
+      "const": "HierarchyEntityDeactivated"
+    },
+    "schemaVersion": {
+      "const": "1.0"
+    },
+    "companyId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "entityId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "entityType": {
+      "type": "string",
+      "enum": [
+        "Agency",
+        "Territory",
+        "Shop",
+        "SalesRep",
+        "Province"
+      ]
+    },
+    "effectiveAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "correlationId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    }
+  }
+}
