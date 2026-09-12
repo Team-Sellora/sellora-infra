@@ -1,5 +1,4 @@
-
-version: '3.8'
+version: "3.8"
 
 services:
   zookeeper:
@@ -26,7 +25,119 @@ services:
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
     healthcheck:
-      test: ["CMD", "kafka-topics", "--bootstrap-server", "localhost:9092", "--list"]
+      test: [ "CMD", "kafka-topics", "--bootstrap-server", "localhost:9092", "--list" ]
       interval: 10s
       timeout: 10s
       retries: 5
+
+  organization-db:
+    image: postgres:16-alpine
+    container_name: sellora-organization-db
+    environment:
+      POSTGRES_DB: organization_db
+      POSTGRES_USER: sellora
+      POSTGRES_PASSWORD: sellora_dev_pw
+    ports:
+      - "5433:5432"
+    volumes:
+      - sellora_organization_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U sellora -d organization_db" ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  catalog-db:
+    image: postgres:16-alpine
+    container_name: sellora-catalog-db
+    environment:
+      POSTGRES_DB: catalog_db
+      POSTGRES_USER: sellora
+      POSTGRES_PASSWORD: sellora_dev_pw
+    ports:
+      - "5434:5432"
+    volumes:
+      - sellora_catalog_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U sellora -d catalog_db" ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  inventory-db:
+    image: postgres:16-alpine
+    container_name: sellora-inventory-db
+    environment:
+      POSTGRES_DB: inventory_db
+      POSTGRES_USER: sellora
+      POSTGRES_PASSWORD: sellora_dev_pw
+    ports:
+      - "5435:5432"
+    volumes:
+      - sellora_inventory_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U sellora -d inventory_db" ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  organization-service:
+    build:
+      context: ../sellora-organization
+      dockerfile: Dockerfile
+    container_name: sellora-organization-service
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__Default: Host=organization-db;Port=5432;Database=organization_db;Username=sellora;Password=sellora_dev_pw
+      Kafka__BootstrapServers: kafka:29092
+    ports:
+      - "8081:8080"
+    depends_on:
+      organization-db:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+
+  catalog-service:
+    build:
+      context: ../sellora-catalog
+      dockerfile: Dockerfile
+    container_name: sellora-catalog-service
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__Default: Host=catalog-db;Port=5432;Database=catalog_db;Username=sellora;Password=sellora_dev_pw
+      Kafka__BootstrapServers: kafka:29092
+    ports:
+      - "8082:8080"
+    depends_on:
+      catalog-db:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+
+  inventory-service:
+    build:
+      context: ../sellora-inventory
+      dockerfile: Dockerfile
+    container_name: sellora-inventory-service
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__Default: Host=inventory-db;Port=5432;Database=inventory_db;Username=sellora;Password=sellora_dev_pw
+      Kafka__BootstrapServers: kafka:29092
+      Kafka__HierarchyTopic: sellora.hierarchy.v1
+      Kafka__ConsumerGroupId: sellora.inventory.hierarchy.v1
+    ports:
+      - "8083:8080"
+    depends_on:
+      inventory-db:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+
+volumes:
+  sellora_organization_pgdata:
+  sellora_catalog_pgdata:
+  sellora_inventory_pgdata:

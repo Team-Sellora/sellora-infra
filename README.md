@@ -185,6 +185,22 @@ So AC3 is *substantially* met — a rebuild is three scripts plus two documented
 manual steps, not a pile of undocumented console clicking. Full automation of the
 attribute definition and deployment.toml is deferred to US-E0-6 (Compose stack).
 
+## Local microservice stack
+
+The shared Compose stack starts Kafka plus the Organization, Product & Catalogue,
+and Inventory services. Each service owns an isolated PostgreSQL database.
+
+| Service | API port | PostgreSQL database | PostgreSQL host port |
+|---|---:|---|---:|
+| Organization | `8081` | `organization_db` | `5433` |
+| Product & Catalogue | `8082` | `catalog_db` | `5434` |
+| Inventory | `8083` | `inventory_db` | `5435` |
+
+Start the complete stack:
+
+```bash
+docker compose up --build -d
+
 ## Troubleshooting
 
 | Symptom | Cause |
