@@ -188,18 +188,20 @@ attribute definition and deployment.toml is deferred to US-E0-6 (Compose stack).
 ## Local microservice stack
 
 The shared Compose stack starts Kafka plus the Organization, Product & Catalogue,
-and Inventory services. Each service owns an isolated PostgreSQL database.
+Inventory and Order services. Each service owns an isolated PostgreSQL database.
 
 | Service | API port | PostgreSQL database | PostgreSQL host port |
 |---|---:|---|---:|
 | Organization | `8081` | `organization_db` | `5433` |
 | Product & Catalogue | `8082` | `catalog_db` | `5434` |
 | Inventory | `8083` | `inventory_db` | `5435` |
+| Order | `8084` | `order_db` | `5436` |
 
 Start the complete stack:
 
 ```bash
 docker compose up --build -d
+```
 
 ## Troubleshooting
 
@@ -219,14 +221,36 @@ docker compose up --build -d
 ## Kafka (local)
 
 Bootstrap server: `localhost:9092`
-Topic: `sellora.hierarchy.v1`
+
+| Topic | Domain | Contracts |
+|---|---|---|
+| `sellora.hierarchy.v1` | Organization (agencies, shops, reps, territories) | `contracts/hierarchy/v1/` |
+| `sellora.order.v1` | Order lifecycle (placed, confirmed, payment, cancelled) | `contracts/order/v1/` |
+
+Topics are auto-created on first use (`KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"`).
+The `kafka-init` service pre-creates `sellora.order.v1` with 3 partitions to guarantee
+per-order ordering under concurrent load before any producer connects.
 
 Start the stack:
+
 ```bash
 docker compose up -d
 ```
 
-Watch messages on the topic:
+Watch messages on the hierarchy topic:
+
 ```bash
-docker exec -it sellora-kafka kafka-console-consumer --bootstrap-server localhost:9092 --topic sellora.hierarchy.v1 --from-beginning
+docker exec -it sellora-kafka kafka-console-consumer \
+  --bootstrap-server localhost:9092 \
+  --topic sellora.hierarchy.v1 \
+  --from-beginning
+```
+
+Watch messages on the order topic:
+
+```bash
+docker exec -it sellora-kafka kafka-console-consumer \
+  --bootstrap-server localhost:9092 \
+  --topic sellora.order.v1 \
+  --from-beginning
 ```
