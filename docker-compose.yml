@@ -30,6 +30,22 @@ services:
       timeout: 10s
       retries: 5
 
+  kafka-init:
+    image: confluentinc/cp-kafka:7.6.0
+    container_name: sellora-kafka-init
+    depends_on:
+      kafka:
+        condition: service_healthy
+    entrypoint: [ "/bin/sh", "-c" ]
+    command:
+      - |
+        kafka-topics --bootstrap-server kafka:29092 \
+          --create --if-not-exists \
+          --topic sellora.order.v1 \
+          --partitions 3 \
+          --replication-factor 1
+    restart: "no"
+
   organization-db:
     image: postgres:16-alpine
     container_name: sellora-organization-db
@@ -79,6 +95,24 @@ services:
       - sellora_inventory_pgdata:/var/lib/postgresql/data
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U sellora -d inventory_db" ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  order-db:
+    image: postgres:16-alpine
+    container_name: sellora-order-db
+    environment:
+      POSTGRES_DB: order_db
+      POSTGRES_USER: sellora
+      POSTGRES_PASSWORD: sellora_dev_pw
+    ports:
+      - "5436:5432"
+    volumes:
+      - sellora_order_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U sellora -d order_db" ]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -137,7 +171,28 @@ services:
       kafka:
         condition: service_healthy
 
+  order-service:
+    build:
+      context: ../sellora-order
+      dockerfile: Dockerfile
+    container_name: sellora-order-service
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__Default: Host=order-db;Port=5432;Database=order_db;Username=sellora;Password=sellora_dev_pw
+      Kafka__BootstrapServers: kafka:29092
+      Kafka__OrderTopic: sellora.order.v1
+    ports:
+      - "8084:8080"
+    depends_on:
+      order-db:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+      kafka-init:
+        condition: service_completed_successfully
+
 volumes:
   sellora_organization_pgdata:
   sellora_catalog_pgdata:
   sellora_inventory_pgdata:
+  sellora_order_pgdata:
