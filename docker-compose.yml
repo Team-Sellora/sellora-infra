@@ -118,6 +118,42 @@ services:
       retries: 10
       start_period: 10s
 
+  notification-db:
+    image: postgres:16-alpine
+    container_name: sellora-notification-db
+    environment:
+      POSTGRES_DB: notification_db
+      POSTGRES_USER: sellora
+      POSTGRES_PASSWORD: sellora_dev_pw
+    ports:
+      - "5437:5432"
+    volumes:
+      - sellora_notification_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U sellora -d notification_db" ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  notification-db:
+    image: postgres:16-alpine
+    container_name: sellora-notification-db
+    environment:
+      POSTGRES_DB: notification_db
+      POSTGRES_USER: sellora
+      POSTGRES_PASSWORD: sellora_dev_pw
+    ports:
+      - "5437:5432"
+    volumes:
+      - sellora_notification_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U sellora -d notification_db" ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
   organization-service:
     build:
       context: ../sellora-organization
@@ -196,3 +232,5 @@ volumes:
   sellora_catalog_pgdata:
   sellora_inventory_pgdata:
   sellora_order_pgdata:
+  sellora_notification_pgdata:
+  sellora_notification_pgdata:
