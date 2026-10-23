@@ -1,0 +1,118 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "PaymentRecorded v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "eventId",
+    "eventType",
+    "schemaVersion",
+    "correlationId",
+    "occurredAt",
+    "orderReference",
+    "companyId",
+    "shopId",
+    "shopName",
+    "agencyId",
+    "agencyName",
+    "salesRepId",
+    "salesRepName",
+    "amount",
+    "currency",
+    "paymentMethod",
+    "checkoutLocation"
+  ],
+  "properties": {
+    "eventId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "eventType": {
+      "const": "PaymentRecorded"
+    },
+    "schemaVersion": {
+      "const": "1.0"
+    },
+    "correlationId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "occurredAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "orderReference": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64
+    },
+    "companyId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "shopId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "shopName": {
+      "type": "string"
+    },
+    "shopEmail": {
+      "type": "string",
+      "format": "email"
+    },
+    "agencyId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "agencyName": {
+      "type": "string"
+    },
+    "agencyEmail": {
+      "type": "string",
+      "format": "email"
+    },
+    "salesRepId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "salesRepName": {
+      "type": "string"
+    },
+    "amount": {
+      "type": "number",
+      "minimum": 0
+    },
+    "currency": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 3
+    },
+    "paymentMethod": {
+      "type": "string",
+      "enum": ["Cash", "Card", "BankTransfer", "Cheque"]
+    },
+    "checkoutLocation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["latitude", "longitude"],
+      "properties": {
+        "latitude": {
+          "type": "number",
+          "minimum": -90,
+          "maximum": 90
+        },
+        "longitude": {
+          "type": "number",
+          "minimum": -180,
+          "maximum": 180
+        },
+        "accuracyMetres": {
+          "type": "number",
+          "minimum": 0
+        }
+      }
+    }
+  }
+}
